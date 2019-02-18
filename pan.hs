@@ -1,4 +1,5 @@
 import Data.List
+import Data.Tuple
 
 data Tree a = Empty | Node a [Tree a]
 
@@ -43,3 +44,25 @@ index n (x:xs) el | x==el = n
                   | otherwise = index (n+1) xs el
 
 max_index n xs = index 1  xs (maximum (take n xs))
+
+-- positions current [] = []
+-- positions current (x:xs) | (snd x)==0 && (fst x)==min_zero (x:xs) = [(current,1)]++(positions (current+1) xs)
+--                          | otherwise = positions current xs
+--
+-- low_ls ls = positions 1 (tup ls)
+--
+-- tup ls = map (\x->(x,0)) ls
+--
+-- delete_one [] = []
+-- delete_one (x:xs) | (snd x)==0 = [x]++( delete_one xs)
+--                   | otherwise = delete_one xs
+--
+-- min_zero ls = minimum (map (\x-> fst x) (delete_one ls))
+
+how_many el ls = sum (many_lower el ls)
+
+many_lower _ [] = []
+many_lower el (x:xs) | x<el = [1]++(many_lower el xs)
+                     | otherwise = [0]++(many_lower el xs)
+
+positions (x:xs) = map (\y->how_many y (x:xs) ) (x:xs)
