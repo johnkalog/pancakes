@@ -66,3 +66,30 @@ many_lower el (x:xs) | x<el = [1]++(many_lower el xs)
                      | otherwise = [0]++(many_lower el xs)
 
 positions (x:xs) = map (\y->how_many y (x:xs) ) (x:xs)
+
+change_nth n el (x:xs) | n==1 = el:xs
+                       | otherwise = x:(change_nth (n-1) el xs)
+
+removeItem _ [] = []
+removeItem x (y:ys) | x==y = removeItem x ys
+                    | otherwise = y:removeItem x ys
+
+-- depth_stack (f:fifo) ls visited [] result = result
+depth_stack (f:fifo) ls visited lists result | (goal_lists f ls lists 1)/=([],0) = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited)
+                                            ( removeItem (fst (goal_lists f ls lists 1)) lists)
+                                            (change_nth (snd (goal_lists f ls lists 1)) (reverse f) result)
+                        | lists==[] = result
+                        | (elem (last (visualize ls f)) visited == True) =  depth_stack fifo ls visited lists result
+                        | otherwise = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited) lists result
+
+initial_zero n = [x | x<-[0..n-1]]
+
+
+batch (x:xs) = depth_stack (initial (length x)) (initial_zero (length x)) [] (x:xs) (x:xs)
+
+goal_lists a ls [] n = ([],0)
+goal_lists a ls (x:xs) n | goal_stack a ls x = (x,n)
+                         | otherwise = goal_lists a ls xs (n+1)
+
+goal_stack a ls for_check | (last (visualize ls a))==for_check = True
+                          | otherwise = False
