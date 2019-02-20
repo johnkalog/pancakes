@@ -74,25 +74,26 @@ removeItem _ [] = []
 removeItem x (y:ys) | x==y = removeItem x ys
                     | otherwise = y:removeItem x ys
 
--- depth_stack (f:fifo) ls visited [] list result = result
-depth_stack (f:fifo) ls visited lists list result | lists==[] = result
-                        | (elem (last (visualize ls f)) visited == True) =  depth_stack fifo ls visited lists list result
-                        | (goal_lists f ls lists 1)/=([],0) = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited)
-                                                                    ( removeItem (fst (goal_lists f ls lists 1)) lists)
-                                                                    list
-                                                                    (result++[((reverse f),(snd (goal_lists f ls list 1)))])
---                                                                    (change_nth (snd (goal_lists f ls ( removeItem (fst (goal_lists f ls lists 1)) lists) 1)) (reverse f) result)
-
-                        | otherwise = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited) lists list result
+-- depth_stack (f:fifo) ls visited [] result = result
+depth_stack (f:fifo) ls visited lists result | lists==[] = result
+                                             | (elem (last (visualize ls f)) visited == True) =  depth_stack fifo ls visited lists result
+                                             | (goal_lists f ls lists)/=([],0) = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited)
+                                            ( removeItem (goal_lists f ls lists) lists)
+                                            (change_nth (snd (goal_lists f ls lists)) (reverse f) result)
+                        | otherwise = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited) lists result
 
 initial_zero n = [x | x<-[0..n-1]]
 
 
-batch (x:xs) = depth_stack (initial (length x)) (initial_zero (length x)) [] (map (\x->positions x) (x:xs)) (map (\x->positions x) (x:xs)) [([],0)]
+batch (x:xs) = depth_stack (initial (length x)) (initial_zero (length x)) [] ( thesis (map (\x->positions x) (x:xs)) 1) (x:xs)
 
-goal_lists a ls [] n = ([],0)
-goal_lists a ls (x:xs) n | goal_stack a ls x = (x,n)
-                         | otherwise = goal_lists a ls xs (n+1)
 
-goal_stack a ls for_check | (last (visualize ls a))==for_check = True
+goal_lists a ls [] = ([],0)
+goal_lists a ls (x:xs) | goal_stack a ls (fst x) = x
+                         | otherwise = goal_lists a ls xs
+
+goal_stack a ls for_check | ( last (visualize ls a))==for_check = True
                           | otherwise = False
+
+thesis [] n = []
+thesis (x:xs) n = (x,n):( thesis xs (n+1))
