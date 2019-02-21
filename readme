@@ -1,0 +1,9 @@
+To αρχείο in περιέχει 10000 stacks μεγέθους 6.
+
+Για να το δοκιμάσετε:
+
+ghci
+> :load solution.hs
+> file<-readFile "in"
+> input=read file :: [[Int]]
+> batch input
