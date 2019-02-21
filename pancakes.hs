@@ -104,6 +104,7 @@ nth n xs = last (take n xs)
 
 flop_b n xs r | (n == 1 && (snd (head xs)) == 1)= reverse (1:r)
             | (n == 1 && (snd (head xs)) == 0)= reverse r
+            | ((max_index n xs)==n) && (snd (nth (max_index n xs) xs) == 0) = flop_b (n-1) xs r
             | ((max_index n xs) /= 1 && (snd (nth (max_index n xs) xs) == 0)) = flop_b (n-1) (burnt_nreve n (burnt_nreve (max_index n xs) xs)) (n:((max_index n xs):r))
             | ((max_index n xs) /= 1 && (snd (nth (max_index n xs) xs) == 1)) = flop_b (n-1) (burnt_nreve n (burnt_nreve 1 (burnt_nreve (max_index n xs) xs))) (n:(1:((max_index n xs):r)))
             | ((max_index n xs) == 1 && (snd (head xs)) == 0) = flop_b (n-1) (burnt_nreve n (burnt_nreve 1 xs)) (n:(1:r))
@@ -164,4 +165,4 @@ burn_depth_stack (f:fifo) ls visited lists result | lists==[] = result
                                             (change_nth (snd (burn_goal_lists f ls lists)) (reverse f) result)
                                     | otherwise = burn_depth_stack (fifo++(next_elem f (length ls))) ls ((last (burnt_visualize ls f)):visited) lists result
 
--- burn_batch (x:xs) = burn_depth_stack [[]] (map (\x-> (x,0)) (initial_zero (length x))) [] ( thesis ( map(\x->zip (positions x) (map (\y->snd y) x) ) (x:xs) ) 1) (x:xs)
+burn_batch (x:xs) = burn_depth_stack [[]] (map (\x-> (x,0)) (initial_zero (length x))) [] ( thesis ( map(\x->zip (positions x) (map (\y->snd y) x) ) (x:xs) ) 1) (map (\x-> positions x) (x:xs) )
