@@ -11,10 +11,15 @@ category (l:ls) | (ls == []) = 8
 
 
 gates (l:ls)
-            | category (l:ls) == 1 = my_merge ( my_flip (l:ls) ((which_flip (l:ls) (head l) 1) -1))
-            | category (l:ls) == 2 = my_merge ( my_flip (l:ls) ((which_flip (l:ls) (head l) 1) -1))
-            | category (l:ls) == 3 = my_merge ( my_flip (l:ls) (min ((which_exac (l:ls) ((head l)-1) 1) -1) (which_exac (l:ls) ((head l)-1) 1) -1))
-            | otherwise = [[category (l:ls)]]
+            | category (l:ls) == 1 = gates (my_merge ( my_flip (l:ls) ((which_flip (l:ls) (head l) 1) -1)))
+            | category (l:ls) == 2 = gates (my_merge ( my_flip (l:ls) ((which_flip (l:ls) (head l) 1) -1)))
+            | category (l:ls) == 3 = gates (my_merge( my_flip ( my_flip ( my_flip (my_flip (l:ls) (min ((which_exac (l:ls) ((head l)-1) 1) ) (which_exac (l:ls) ((head l)-1) 1) )) (min ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1) -1) ) (max ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1)))
+            ((which_exac ( my_flip ( my_flip (my_flip (l:ls) (min ((which_exac (l:ls) ((head l)-1) 1) ) (which_exac (l:ls) ((head l)-1) 1) )) (min ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1) -1) ) (max ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1))) (head l) 1)-1) ) )
+            | category (l:ls) == 4 = gates (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )) )
+            | category (l:ls) == 5 = gates (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )))
+            | category (l:ls) == 6 = gates (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )))
+            | category (l:ls) == 7 = gates (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )))
+            | otherwise = category (l:ls)
 
 next_abj x [] = 0
 next_abj x (l:ls) | ((head l) == x) = (length l)
