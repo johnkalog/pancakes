@@ -85,17 +85,30 @@ goal_lists a ls (x:xs) | goal_stack a ls (fst x) = x
 goal_stack a ls for_check | ( last (visualize ls a))==for_check = True
                           | otherwise = False
 
-depth_stack (f:fifo) ls visited lists result | lists==[] = result
-                                    -- | (elem (last (visualize ls f)) visited == True) =  depth_stack fifo ls visited lists result
-                                    | (goal_lists f ls lists)/=([],0) = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited)
-                                            ( removeItem (goal_lists f ls lists) lists) --afaireitai h lista pou ikanopoieitai apo to lists kai topotheteitai sto result to f sthn katallhlh thesi tou
-                                            (change_nth (snd (goal_lists f ls lists)) (reverse f) result)
-                                    | otherwise = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited) lists result
+--depth_stack (f:fifo) ls visited lists result | lists==[] = result
+--                                    --| (elem (last (visualize ls f)) visited == True) =  depth_stack fifo ls visited lists result
+--                                    | (goal_lists f ls lists)/=([],0) = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited)
+--                                            ( removeItem (goal_lists f ls lists) lists) --afaireitai h lista pou ikanopoieitai apo to lists kai topotheteitai sto result to f sthn katallhlh thesi tou
+--                                            (change_nth (snd (goal_lists f ls lists)) (reverse f) result)
+--                                    | otherwise = depth_stack (fifo++(next_elem f (length ls))) ls ((last (visualize ls f)):visited) lists result
+
+depth_stack fifo ls visited [] result = []
+depth_stack (f:fifo) ls visited (l:lists) result
+                      | (last (visualize ls f))== l =  ((reverse f):(depth_stack fifo ls (((last (visualize ls f),f)):visited) lists result))
+                      | (elem l (map (\x->(fst x)) ( visited)) == True) = ((reverse (find_tuple l visited)):(depth_stack (f:fifo) ls visited lists result))
+                      | (elem (last (visualize ls f)) (map (\x->(fst x)) ( visited)) == True) = depth_stack fifo ls visited (l:lists) result
+                      | otherwise = depth_stack (fifo++(next_elem f (length ls))) ls (((last (visualize ls f),f)):visited) (l:lists) result
+
+
+
 
 thesis [] n = [] --metatroph apo lista se lista apo tuples me deutero stoixeio thn thesi
 thesis (x:xs) n = (x,n):( thesis xs (n+1))
 
-batch (x:xs) = depth_stack [[]] (initial_zero (length x)) [] ( thesis (map (\x->positions x) (x:xs)) 1) (x:xs)
+batch (x:xs) = depth_stack [[]] (initial_zero (length x)) [] ( (map (\x->positions x) (x:xs))) []
+
+
+--batch (x:xs) = depth_stack [[]] (initial_zero (length x)) [] ( thesis (map (\x->positions x) (x:xs)) 1) (x:xs)
 
 ----------------------------------------------------------------burnt--------------------------------------------------------------------------------
 
