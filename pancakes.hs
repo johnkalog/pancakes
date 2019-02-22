@@ -142,7 +142,7 @@ check_burnt ((x,y):ls) | y == 0 = check_burnt ls
 
 goal_b a ls= checkList (last (burnt_visualize ls a)) && check_burnt (last (burnt_visualize ls a))
 
-depth_b (f:fifo) ls visited | goal f ls= f
+depth_b (f:fifo) ls visited | goal_b f ls= f
                         | (elem (last (burnt_visualize ls f)) visited == True) =  depth_b fifo ls visited
                         | otherwise = depth_b (fifo++(next_elem f (length ls))) ls ((last (burnt_visualize ls f)):visited)
 
@@ -152,15 +152,15 @@ burnt_bfs ls = depth_b [[]] ls []
 zero_tup [] = []
 zero_tup ((x,y):xs) = (x,0):(zero_tup xs)
 
-d1_b (f1:fifo1) fifo2 dep ls visited1 visited2 | length f1 > dep = d2 (f1:fifo1) fifo2 dep  ls visited1 []
+d1_d (f1:fifo1) fifo2 dep ls visited1 visited2 | length f1 > dep = d2_d (f1:fifo1) fifo2 dep  ls visited1 []
                                             | (length f1 == dep) && (elem (last (burnt_visualize ls f1)) ( map (\x->fst x) visited2 )== True) = f1++(reverse (find_tuple (last (burnt_visualize ls f1)) visited2))
-                                            | otherwise = d1_b (fifo1++( (next_elem f1 (length ls)))) fifo2 dep ls (((last (burnt_visualize ls f1)),f1):visited1) visited2
+                                            | otherwise = d1_d (fifo1++( (next_elem f1 (length ls)))) fifo2 dep ls (((last (burnt_visualize ls f1)),f1):visited1) visited2
 
-d2_b fifo1 (f2:fifo2) dep ls visited1 visited2 | length f2 > dep = d1 fifo1 (f2:fifo2) (dep+1)  ls [] visited2
+d2_d fifo1 (f2:fifo2) dep ls visited1 visited2 | length f2 > dep = d1_d fifo1 (f2:fifo2) (dep+1)  ls [] visited2
                                 | (length f2 == dep) && (elem (last (burnt_visualize (sort (zero_tup ls)) f2)) ( map (\x->fst x) visited1 )== True) = ((find_tuple (last (burnt_visualize (sort (zero_tup ls)) f2)) visited1))++( reverse f2)
-                                | otherwise = d2_b fifo1 (fifo2++( (next_elem f2 (length ls)))) dep ls visited1 (((last (burnt_visualize (sort (zero_tup ls)) f2)),f2):visited2)
+                                | otherwise = d2_d fifo1 (fifo2++( (next_elem f2 (length ls)))) dep ls visited1 (((last (burnt_visualize (sort (zero_tup ls)) f2)),f2):visited2)
 
-burnt_bidirectional ls = d1_b [[]] [[]] 0 ls [(ls,[])] [((sort (zero_tup ls)),[])]
+burnt_bidirectional ls = d1_d [[]] [[]] 0 ls [(ls,[])] [((sort (zero_tup ls)),[])]
 
 --------burnt_batch-------
 
@@ -178,7 +178,7 @@ burn_depth_stack (f:fifo) ls visited lists result | lists==[] = result
                                             (change_nth (snd (burn_goal_lists f ls lists)) (reverse f) result)
                                     | otherwise = burn_depth_stack (fifo++(next_elem f (length ls))) ls ((last (burnt_visualize ls f)):visited) lists result
 
-burn_batch (x:xs) = burn_depth_stack [[]] (map (\x-> (x,0)) (initial_zero (length x))) [] ( thesis ( map(\x->zip (positions x) (map (\y->snd y) x) ) (x:xs) ) 1) (map (\x-> positions x) (x:xs) )
+burnt_batch (x:xs) = burn_depth_stack [[]] (map (\x-> (x,0)) (initial_zero (length x))) [] ( thesis ( map(\x->zip (positions x) (map (\y->snd y) x) ) (x:xs) ) 1) (map (\x-> positions x) (x:xs) )
 
 ----------------------------------------------------------------gates--------------------------------------------------------------------------------
 
@@ -193,16 +193,18 @@ category (l:ls) | (ls == []) = 8
                 | otherwise = 10
 
 
-gates (l:ls)
-            | category (l:ls) == 1 = gates (my_merge ( my_flip (l:ls) ((which_flip (l:ls) (head l) 1) -1)))
-            | category (l:ls) == 2 = gates (my_merge ( my_flip (l:ls) ((which_flip (l:ls) (head l) 1) -1)))
-            | category (l:ls) == 3 = gates (my_merge( my_flip ( my_flip ( my_flip (my_flip (l:ls) (min ((which_exac (l:ls) ((head l)-1) 1) ) (which_exac (l:ls) ((head l)-1) 1) )) (min ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1) -1) ) (max ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1)))
+g_lists (l:ls)
+            | category (l:ls) == 1 = g_lists (my_merge ( my_flip (l:ls) ((which_flip (l:ls) (head l) 1) -1)))
+            | category (l:ls) == 2 = g_lists (my_merge ( my_flip (l:ls) ((which_flip (l:ls) (head l) 1) -1)))
+            | category (l:ls) == 3 = g_lists (my_merge( my_flip ( my_flip ( my_flip (my_flip (l:ls) (min ((which_exac (l:ls) ((head l)-1) 1) ) (which_exac (l:ls) ((head l)-1) 1) )) (min ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1) -1) ) (max ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1)))
             ((which_exac ( my_flip ( my_flip (my_flip (l:ls) (min ((which_exac (l:ls) ((head l)-1) 1) ) (which_exac (l:ls) ((head l)-1) 1) )) (min ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1) -1) ) (max ((which_exac (l:ls) ((head l)+1) 1) ) (which_exac (l:ls) ((head l)-1) 1))) (head l) 1)-1) ) )
-            | category (l:ls) == 4 = gates (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )) )
-            | category (l:ls) == 5 = gates (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )))
-            | category (l:ls) == 6 = gates (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )))
-            | category (l:ls) == 7 = gates (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )))
-            | otherwise = category (l:ls)
+            | category (l:ls) == 4 = g_lists (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )) )
+            | category (l:ls) == 5 = g_lists (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )))
+            | category (l:ls) == 6 = g_lists (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )))
+            | category (l:ls) == 7 = g_lists (my_merge ( my_flip (l:ls) ((which_flip (ls) (head l) 1) )))
+            | otherwise = (l:ls)
+
+gates ls = g_lists (my_merge ((map(\x-> [x])) (positions ls)))
 
 next_abj x [] = 0
 next_abj x (l:ls) | ((head l) == x) = (length l)
